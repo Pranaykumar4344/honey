@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Neon Love for HONEY</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+   canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none; /* ← Add this here */
+}
+
+    #message {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff5cc8;
+      font-size: 2rem;
+      white-space: nowrap;
+      z-index: 2;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      text-shadow: 0 0 10px hotpink;
+    }
+
+    #poem {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffffff;
+      font-size: 1.2rem;
+      max-width: 80%;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 1s;
+      z-index: 2;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+
+    #music-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      padding: 10px 15px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+    }
+
+    .floating-word {
+      position: absolute;
+      font-size: 1.5rem;
+      color: hotpink;
+      animation: floatUp 10s linear forwards;
+      pointer-events: none;
+      z-index: 1;
+      text-shadow: 0 0 5px pink;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0vh) scale(0.8);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-80vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    #photo {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 150px;
+      height: auto;
+      opacity: 0;
+      transition: opacity 2s;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      z-index: 2;
+    }
+
+    #reveal-btn {
+      position: fixed;
+      bottom: 100px;
+      left: 30px;
+      padding: 12px;
+      font-size: 1.5rem;
+      background: rgba(255, 105, 180, 0.1);
+      color: hotpink;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 3;
+      box-shadow: 0 0 10px hotpink;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px hotpink; }
+      50% { box-shadow: 0 0 20px hotpink; }
+      100% { box-shadow: 0 0 5px hotpink; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <canvas id="hearts-canvas"></canvas>
+
+  <div id="message"></div>
+  <div id="poem">Click anywhere to reveal something beautiful...</div>
+  <button id="music-toggle">Play Music</button>
+  <button id="reveal-btn" title="Try clicking me...">💖</button>
+
+  <img id="photo" src="civil.jpeg" alt="user's Photo" />
+
+<audio id="bgMusic" loop>
+  <source src="song/Raabta_Instrumental.mp3" type="audio/mp3">
+  Your browser does not support the audio element.
+</audio>
+
+  <script>
+    window.onload = function () {
+      const canvas = document.getElementById("canvas");
+      const heartsCanvas = document.getElementById("hearts-canvas");
+      const ctx = heartsCanvas.getContext("2d");
+      const messageEl = document.getElementById("message");
+      const poemEl = document.getElementById("poem");
+      const music = document.getElementById("bgMusic");
+      const musicToggle = document.getElementById("music-toggle");
+      const photo = document.getElementById("photo");
+      const revealBtn = document.getElementById("reveal-btn");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      heartsCanvas.width = window.innerWidth;
+      heartsCanvas.height = window.innerHeight;
+
+      // Typing effect
+      const message = "Hey HONEY... you're the spark in this neon world 💖";
+      let i = 0;
+      function typeWriter() {
+        if (i < message.length) {
+          messageEl.textContent += message.charAt(i);
+          i++;
+          setTimeout(typeWriter, 80);
+        }
+      }
+      typeWriter();
+
+      // Music toggle with autoplay-safe handling
+      let isPlaying = false;
+musicToggle.addEventListener("click", () => {
+  if (!isPlaying) {
+    music.play().then(() => {
+      musicToggle.textContent = "Pause Music";
+      isPlaying = true;
+    }).catch(err => {
+      alert("Click to allow audio playback");
+    });
+  } else {
+    music.pause();
+    musicToggle.textContent = "Play Music";
+    isPlaying = false;
+  }
+});
+
+      // Reveal poem and photo
+      document.body.addEventListener("click", () => {
+        poemEl.textContent = `In every glow, I see your face,\nA timeless spark, a soft embrace.\nYou light my world, both near and far,\nMy Honey — my guiding star.`;
+        poemEl.style.opacity = 1;
+        photo.style.opacity = 1;
+      });
+
+      // Floating words
+      const words = ["love", "HONEY", "spark", "shine", "💖", "glow"];
+      function createFloatingWord() {
+        const word = document.createElement("div");
+        word.className = "floating-word";
+        word.style.left = Math.random() * window.innerWidth + "px";
+        word.style.top = window.innerHeight + "px";
+        word.textContent = words[Math.floor(Math.random() * words.length)];
+        document.body.appendChild(word);
+        setTimeout(() => word.remove(), 10000);
+      }
+      setInterval(createFloatingWord, 800);
+
+      // Heart particles
+      let hearts = [];
+      function createHeart() {
+        const x = Math.random() * heartsCanvas.width;
+        const y = heartsCanvas.height + 20;
+        const size = Math.random() * 10 + 10;
+        const speed = Math.random() * 1 + 0.5;
+        hearts.push({ x, y, size, speed });
+      }
+
+      function drawHeart(x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size);
+        ctx.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0);
+        ctx.fillStyle = "rgba(255, 105, 180, 0.8)";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animateHearts() {
+        ctx.clearRect(0, 0, heartsCanvas.width, heartsCanvas.height);
+        for (let i = 0; i < hearts.length; i++) {
+          const h = hearts[i];
+          h.y -= h.speed;
+          drawHeart(h.x, h.y, h.size);
+          if (h.y < -20) hearts.splice(i, 1);
+        }
+        requestAnimationFrame(animateHearts);
+      }
+
+      revealBtn.addEventListener("click", () => {
+        setInterval(createHeart, 200);
+        animateHearts();
+      });
+    };
+  </script>
+</body>
+</html>
